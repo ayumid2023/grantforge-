@@ -1,0 +1,20 @@
+name: Test AI API Key
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  test-ai:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Test if API key is available
+        run: |
+          if [ -n "${{ secrets.GEMINI_API_KEY }}" ]; then
+            echo "✅ API Key is available!"
+          else
+            echo "❌ API Key is NOT available!"
+          fi
