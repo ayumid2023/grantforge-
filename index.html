@@ -3,53 +3,214 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GrantForge - AI Grant Assistant</title>
+    <title>GrantForge - Upload and Analyze</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 50px auto;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f0f4f8;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             padding: 20px;
-            background: #f5f5f5;
         }
         .container {
             background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 40px;
+            border-radius: 16px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
         }
         h1 {
-            color: #2c3e50;
+            color: #1a202c;
+            font-size: 28px;
+            margin-bottom: 8px;
         }
-        .feature {
-            background: #e8f4f8;
-            padding: 10px 15px;
-            margin: 10px 0;
-            border-radius: 5px;
+        .subtitle {
+            color: #718096;
+            margin-bottom: 24px;
+        }
+        .upload-area {
+            border: 2px dashed #cbd5e0;
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            background: #f7fafc;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .upload-area:hover {
+            border-color: #4299e1;
+            background: #ebf8ff;
+        }
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+        .upload-text {
+            color: #4a5568;
+            font-size: 16px;
+        }
+        .upload-hint {
+            color: #a0aec0;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+        #fileInput {
+            display: none;
+        }
+        .file-list {
+            margin-top: 20px;
+        }
+        .file-item {
+            background: #f7fafc;
+            padding: 12px 16px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .file-name {
+            color: #2d3748;
+            font-size: 14px;
+        }
+        .file-size {
+            color: #a0aec0;
+            font-size: 12px;
+        }
+        .analyze-btn {
+            width: 100%;
+            padding: 14px;
+            background: #4299e1;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 20px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .analyze-btn:hover {
+            background: #3182ce;
+        }
+        .analyze-btn:disabled {
+            background: #a0aec0;
+            cursor: not-allowed;
+        }
+        .result-area {
+            margin-top: 20px;
+            padding: 16px;
+            background: #ebf8ff;
+            border-radius: 8px;
+            display: none;
+        }
+        .result-area.show {
+            display: block;
+        }
+        .result-area h3 {
+            color: #2b6cb0;
+            margin-bottom: 8px;
+        }
+        .result-area p {
+            color: #2d3748;
+            font-size: 14px;
+            line-height: 1.6;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🚀 GrantForge</h1>
-        <p><strong>AI-Powered Grant Assistant for Ethiopian NGOs</strong></p>
+        <h1>📄 GrantForge</h1>
+        <p class="subtitle">Upload your documents for AI-powered grant analysis</p>
         
-        <div class="feature">
-            📄 Upload PDFs, DOCXs, and more
+        <div class="upload-area" id="uploadArea">
+            <div class="upload-icon">📁</div>
+            <div class="upload-text">Click or drag to upload files</div>
+            <div class="upload-hint">Supports PDF, DOCX, TXT, and more</div>
         </div>
-        <div class="feature">
-            🔗 Analyze links and websites
-        </div>
-        <div class="feature">
-            🤖 AI-powered grant matching
-        </div>
-        <div class="feature">
-            📊 Market assessment & analysis
-        </div>
+        <input type="file" id="fileInput" multiple>
         
-        <p style="margin-top: 30px; color: #7f8c8d;">
-            Coming soon! Building the future of grant writing.
-        </p>
+        <div class="file-list" id="fileList"></div>
+        
+        <button class="analyze-btn" id="analyzeBtn" disabled>Analyze with AI</button>
+        
+        <div class="result-area" id="resultArea">
+            <h3>🤖 AI Analysis</h3>
+            <p id="resultText">Your documents will be analyzed here...</p>
+        </div>
     </div>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const fileList = document.getElementById('fileList');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const resultArea = document.getElementById('resultArea');
+        const resultText = document.getElementById('resultText');
+        let uploadedFiles = [];
+
+        // Click to upload
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        // Drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#4299e1';
+            uploadArea.style.background = '#ebf8ff';
+        });
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.borderColor = '#cbd5e0';
+            uploadArea.style.background = '#f7fafc';
+        });
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#cbd5e0';
+            uploadArea.style.background = '#f7fafc';
+            handleFiles(e.dataTransfer.files);
+        });
+
+        // File selection
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+
+        function handleFiles(files) {
+            for (let file of files) {
+                uploadedFiles.push(file);
+                const div = document.createElement('div');
+                div.className = 'file-item';
+                div.innerHTML = `
+                    <span class="file-name">${file.name}</span>
+                    <span class="file-size">${(file.size / 1024).toFixed(0)} KB</span>
+                `;
+                fileList.appendChild(div);
+            }
+            analyzeBtn.disabled = false;
+            analyzeBtn.textContent = `Analyze ${uploadedFiles.length} file(s) with AI`;
+        }
+
+        // Analysis button
+        analyzeBtn.addEventListener('click', () => {
+            resultArea.classList.add('show');
+            resultText.textContent = `📊 Analyzing ${uploadedFiles.length} documents... This is where the AI will provide grant recommendations and market insights.`;
+            analyzeBtn.disabled = true;
+            analyzeBtn.textContent = 'Analyzing...';
+            
+            // Reset after 3 seconds (will connect to real AI later)
+            setTimeout(() => {
+                resultText.textContent = `✅ Analysis complete! Found 3 potential grant opportunities matching your documents.\n\nTop recommendation: EU Civil Society Fund - EUR 10,000 available for Ethiopian NGOs.\n\nYour organization shows strong alignment with: Education, Community Development, and Women's Empowerment.`;
+                analyzeBtn.disabled = false;
+                analyzeBtn.textContent = 'Analyze More Documents';
+            }, 3000);
+        });
+    </script>
 </body>
 </html>
