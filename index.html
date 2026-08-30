@@ -150,19 +150,48 @@
 
     <script>
         // Analysis button
-analyzeBtn.addEventListener('click', () => {
+analyzeBtn.addEventListener('click', async () => {
     resultArea.classList.add('show');
-    resultText.textContent = `📊 Analyzing ${uploadedFiles.length} documents... This is where the AI will provide grant recommendations and market insights.`;
+    resultText.textContent = `📊 Analyzing ${uploadedFiles.length} documents with AI...`;
     analyzeBtn.disabled = true;
     analyzeBtn.textContent = 'Analyzing...';
     
-    // Reset after 3 seconds (will connect to real AI later)
-    setTimeout(() => {
-        resultText.textContent = `✅ Analysis complete! Found 3 potential grant opportunities matching your documents.\n\nTop recommendation: EU Civil Society Fund - EUR 10,000 available for Ethiopian NGOs.\n\nYour organization shows strong alignment with: Education, Community Development, and Women's Empowerment.`;
+    try {
+        // In a real app, this would call your backend API
+        // For now, we simulate a call to our helper
+        const aiResponse = await simulateAIAnalysis(uploadedFiles);
+        resultText.textContent = aiResponse;
+    } catch (error) {
+        resultText.textContent = '❌ Error analyzing documents. Please try again.';
+        console.error('Error:', error);
+    } finally {
         analyzeBtn.disabled = false;
         analyzeBtn.textContent = 'Analyze More Documents';
-    }, 3000);
+    }
 });
+
+// Simulate AI analysis (this is your demo response)
+function simulateAIAnalysis(files) {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            const fileNames = files.map(f => f.name).join(', ');
+            let response = `✅ Analysis complete for ${files.length} file(s): ${fileNames}\n\n`;
+            response += `📊 Market Assessment:\n`;
+            response += `• 3 active grant opportunities in Ethiopia match your profile\n`;
+            response += `• Top opportunity: EU Civil Society Fund II (EUR 10,000)\n`;
+            response += `• Competition level: Medium (43 applications expected)\n\n`;
+            response += `📈 Organization Analysis:\n`;
+            response += `• Your documents show strong capacity in community development\n`;
+            response += `• Recommended focus: Education and Women's Empowerment\n`;
+            response += `• Suggested budget range: $5,000 - $15,000\n\n`;
+            response += `🎯 Next Steps:\n`;
+            response += `1. Complete EU CSF II application by December 15\n`;
+            response += `2. Prepare consortium with 2-3 partner NGOs\n`;
+            response += `3. Focus on impact metrics for women beneficiaries`;
+            resolve(response);
+        }, 2000);
+    });
+}
         const uploadArea = document.getElementById('uploadArea');
         const fileInput = document.getElementById('fileInput');
         const fileList = document.getElementById('fileList');
