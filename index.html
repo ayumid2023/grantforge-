@@ -149,6 +149,20 @@
     </div>
 
     <script>
+        // Analysis button
+analyzeBtn.addEventListener('click', () => {
+    resultArea.classList.add('show');
+    resultText.textContent = `📊 Analyzing ${uploadedFiles.length} documents... This is where the AI will provide grant recommendations and market insights.`;
+    analyzeBtn.disabled = true;
+    analyzeBtn.textContent = 'Analyzing...';
+    
+    // Reset after 3 seconds (will connect to real AI later)
+    setTimeout(() => {
+        resultText.textContent = `✅ Analysis complete! Found 3 potential grant opportunities matching your documents.\n\nTop recommendation: EU Civil Society Fund - EUR 10,000 available for Ethiopian NGOs.\n\nYour organization shows strong alignment with: Education, Community Development, and Women's Empowerment.`;
+        analyzeBtn.disabled = false;
+        analyzeBtn.textContent = 'Analyze More Documents';
+    }, 3000);
+});
         const uploadArea = document.getElementById('uploadArea');
         const fileInput = document.getElementById('fileInput');
         const fileList = document.getElementById('fileList');
